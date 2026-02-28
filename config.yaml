@@ -14,6 +14,9 @@ model:
   # SSM state dimension (controls memory capacity of each layer)
   d_state: 16
 
+  # Number of fractal SSM hierarchy levels
+  fractal_levels: 2
+
   # Intermediate expansion factor inside each CDLE block
   d_ff: 256
 
@@ -26,11 +29,20 @@ model:
   # Liquid Time-Constant base tau value
   ltc_tau_base: 1.0
 
+  # Complexity gate threshold for sparse liquid routing
+  complexity_gate_threshold: 0.5
+
   # Forward-Forward goodness threshold
   ff_threshold: 2.0
 
+  # FF variant: "distance" (Distance-FF) or "contrastive" (Self-Contrastive)
+  ff_variant: "distance"
+
   # Dropout probability (0 = off for speed)
   dropout: 0.0
+
+  # Maximum parameter count (hard cap for all models)
+  max_params: 12000000
 
 training:
   # Mini-batch size. Keep small for CPU memory.
@@ -70,6 +82,12 @@ data:
   # Local cache path for prepared data
   cache_path: "data/tinystories_cache.pt"
 
+  # Multi-task eval datasets (1k samples each)
+  multi_task:
+    piqa_samples: 1000
+    gsm8k_samples: 1000
+    arc_samples: 1000
+
 evolution:
   # Path to the evolutionary memory JSON file
   memory_path: "evolutionary_memory.json"
@@ -82,3 +100,22 @@ evolution:
 
   # Maximum history entries to keep in memory (oldest are pruned)
   max_history: 20
+
+  # QD archive settings (MAP-Elites style)
+  qd_archive_path: "archive/qd_population.json"
+  qd_max_species: 12
+  qd_complexity_bins: 4
+  qd_sparsity_bins: 3
+
+curriculum:
+  # Curriculum evolution settings
+  initial_difficulty: 0.3
+  max_difficulty: 1.0
+  difficulty_step: 0.1
+  curriculum_path: "archive/curriculum_state.json"
+
+energy:
+  # Energy proxy estimation settings
+  cpu_tdp_watts: 65.0
+  flops_weight: 0.5
+  watt_weight: 0.5

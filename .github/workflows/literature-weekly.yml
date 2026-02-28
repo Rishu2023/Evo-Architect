@@ -1,0 +1,73 @@
+# ===========================================================================
+# .github/workflows/literature-weekly.yml
+# ===========================================================================
+# Literature Ingestion Agent
+#
+# Triggers:
+#   - Manual: workflow_dispatch
+#   - Weekly schedule: every Sunday at 06:00 UTC
+#
+# What it does:
+#   1. Queries Semantic Scholar API for recent papers on SSM, Liquid NNs,
+#      Forward-Forward learning, and related topics.
+#   2. Extracts titles, abstract snippets, citation counts.
+#   3. Stores top papers in evolutionary_memory.json under "literature" key.
+#   4. Agent 1 can use these insights for architecture proposals.
+#
+# Cost: ~1 min per run × 1 run/week = negligible.
+# ===========================================================================
+
+name: Weekly Literature Ingestion
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Every Sunday at 06:00 UTC
+    - cron: "0 6 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: literature-weekly
+  cancel-in-progress: true
+
+jobs:
+  literature-ingest:
+    name: "Literature Agent — Ingest Recent Papers"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests pyyaml
+
+      - name: Run Literature Ingestion Agent
+        run: |
+          python agents/literature_ingest.py
+
+      - name: Commit literature updates
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add evolutionary_memory.json
+          git diff --cached --quiet && echo "No new literature." || \
+            git commit -m "📖 Weekly literature ingestion — $(date +%Y-%m-%d)"
+
+          git push origin HEAD

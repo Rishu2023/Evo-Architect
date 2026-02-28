@@ -28,7 +28,6 @@ data/*.bin
 checkpoints/
 
 # Matplotlib figures
-*.png
 *.pdf
 figures/
 
@@ -56,3 +55,8 @@ utils/__pycache__/
 models/__pycache__/
 agents/__pycache__/
 data/__pycache__/
+benchmarks/__pycache__/
+
+# Jekyll build output (for GitHub Pages dashboard)
+docs/_site/
+docs/.jekyll-cache/

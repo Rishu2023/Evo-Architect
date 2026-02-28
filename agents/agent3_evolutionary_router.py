@@ -37,6 +37,8 @@ log = logging.getLogger(__name__)
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from utils.metrics import compute_qd_niche, update_qd_archive
+
 CONFIG_PATH = "config.yaml"
 MEMORY_PATH = "evolutionary_memory.json"
 RESULTS_PATH = "benchmark_results.json"
@@ -137,6 +139,50 @@ def main():
             with open(CONFIG_PATH, "w") as f:
                 yaml.dump(cfg, f, default_flow_style=False, sort_keys=False)
             log.info("Reverted config.yaml (model + training) to best known configuration.")
+
+    # ------------------------------------------------------------------
+    # QD archive update (MAP-Elites)
+    # ------------------------------------------------------------------
+    evo_cfg = cfg.get("evolution", {})
+    qd_archive_path = evo_cfg.get("qd_archive_path", "archive/qd_population.json")
+    qd_archive = load_json(qd_archive_path)
+
+    if qd_archive:
+        archive_niches = qd_archive.get("niches", {})
+        n_complexity_bins = evo_cfg.get("qd_complexity_bins", 4)
+        n_sparsity_bins = evo_cfg.get("qd_sparsity_bins", 3)
+
+        complexity = new_param_count / 12_000_000
+        sparsity = cdle.get("sparsity", 0.0)
+        niche = compute_qd_niche(complexity, sparsity, n_complexity_bins, n_sparsity_bins)
+        niche_key = str(niche)
+
+        candidate = {
+            "fitness": new_lpw,
+            "generation": generation,
+            "val_loss": new_val_loss,
+            "loss_per_watt": new_lpw,
+            "param_count": new_param_count,
+            "sparsity": sparsity,
+            "niche": niche_key,
+            "config_snapshot": cfg.get("model", {}),
+        }
+
+        inserted = update_qd_archive(archive_niches, candidate, niche_key)
+
+        stats = qd_archive.get("stats", {})
+        if inserted:
+            stats["total_insertions"] = stats.get("total_insertions", 0) + 1
+        total_cells = n_complexity_bins * n_sparsity_bins
+        stats["coverage"] = len(archive_niches) / total_cells if total_cells > 0 else 0.0
+        qd_archive["stats"] = stats
+        qd_archive["niches"] = archive_niches
+
+        save_json(qd_archive, qd_archive_path)
+        log.info(
+            f"QD archive: {len(archive_niches)} niches filled, "
+            f"coverage={stats['coverage']:.1%}"
+        )
 
     # ------------------------------------------------------------------
     # Update memory

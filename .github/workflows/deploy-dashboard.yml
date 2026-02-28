@@ -1,0 +1,78 @@
+# ===========================================================================
+# .github/workflows/deploy-dashboard.yml
+# ===========================================================================
+# GitHub Pages Dashboard Deployment
+#
+# Triggers:
+#   - Push to main branch (auto-deploy after merge)
+#   - Manual: workflow_dispatch
+#
+# What it does:
+#   1. Generates dashboard data (plots, leaderboard) from benchmark results.
+#   2. Deploys static HTML to GitHub Pages.
+#
+# The dashboard shows:
+#   - Evolution leaderboard (best architectures)
+#   - Loss/efficiency plots over generations
+#   - QD archive heatmap
+#   - Best model playground (inference demo)
+# ===========================================================================
+
+name: Deploy Dashboard
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "evolutionary_memory.json"
+      - "benchmark_results.json"
+      - "archive/**"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-dashboard
+  cancel-in-progress: true
+
+jobs:
+  deploy-pages:
+    name: "Deploy GitHub Pages Dashboard"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build dashboard
+        run: |
+          # Copy latest data files into docs for the dashboard
+          cp -f benchmark_results.json docs/benchmark_results.json 2>/dev/null || true
+          cp -f evolutionary_memory.json docs/evolutionary_memory.json 2>/dev/null || true
+          cp -f archive/qd_population.json docs/qd_population.json 2>/dev/null || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

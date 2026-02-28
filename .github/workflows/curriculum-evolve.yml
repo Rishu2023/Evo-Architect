@@ -1,0 +1,72 @@
+# ===========================================================================
+# .github/workflows/curriculum-evolve.yml
+# ===========================================================================
+# Agent 5: Curriculum Evolution Agent
+#
+# Triggers:
+#   - Manual: workflow_dispatch
+#   - After judge-and-merge completes (learns from each generation)
+#
+# What it does:
+#   1. Loads current curriculum state and benchmark results.
+#   2. Decides whether to increase, decrease, or hold difficulty.
+#   3. Updates archive/curriculum_state.json.
+#   4. Commits the updated curriculum back to the repository.
+# ===========================================================================
+
+name: Evolve Curriculum
+
+on:
+  workflow_dispatch:
+
+  workflow_run:
+    workflows:
+      - "Judge and Merge"
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: curriculum-evolve
+  cancel-in-progress: true
+
+jobs:
+  agent5-curriculum:
+    name: "Agent 5 — Curriculum Evolution"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Run Agent 5 — Curriculum Evolution
+        run: |
+          python agents/agent5_curriculum.py
+
+      - name: Commit curriculum updates
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add archive/curriculum_state.json
+          git diff --cached --quiet && echo "No curriculum changes." || \
+            git commit -m "📚 Agent 5 — curriculum difficulty updated"
+
+          git push origin HEAD
