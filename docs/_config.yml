@@ -1,0 +1,11 @@
+remote_theme: pages-themes/minimal@v0.2.0
+
+title: "Evo-Architect Dashboard"
+description: "Live dashboard for the CDLE self-evolving AI research lab"
+
+# GitHub Pages settings
+baseurl: ""
+url: ""
+
+# Build settings
+markdown: kramdown
