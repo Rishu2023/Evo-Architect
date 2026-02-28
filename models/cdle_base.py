@@ -249,7 +249,7 @@ class LiquidTimeConstant(nn.Module):
     Args:
         d_model:               Feature dimension.
         tau_base:              Maximum time constant (larger = slower dynamics).
-        complexity_threshold:  Gate threshold in (0, 1).  Tokens with gate
+        complexity_gate_threshold:  Gate threshold in (0, 1).  Tokens with gate
                                value below this skip full LTC processing.
                                Set to 0.0 to disable sparse routing (all
                                tokens processed).
@@ -259,12 +259,12 @@ class LiquidTimeConstant(nn.Module):
         self,
         d_model: int,
         tau_base: float = 1.0,
-        complexity_threshold: float = 0.0,
+        complexity_gate_threshold: float = 0.0,
     ):
         super().__init__()
         self.d_model = d_model
         self.tau_base = tau_base
-        self.complexity_threshold = complexity_threshold
+        self.complexity_gate_threshold = complexity_gate_threshold
 
         # Estimate input complexity (used to compute τ)
         self.complexity_proj = nn.Linear(d_model, d_model, bias=True)
@@ -299,11 +299,11 @@ class LiquidTimeConstant(nn.Module):
 
         # Build a boolean mask of tokens that need full LTC computation.
         # Tokens below the threshold get an identity-like bypass.
-        complex_mask = (gate_score > self.complexity_threshold)  # (B, L, 1)
+        complex_mask = (gate_score > self.complexity_gate_threshold)  # (B, L, 1)
 
-        # If *no* tokens pass the gate (all simple), fast-return with norm.
-        if not complex_mask.any():
-            return self.norm(x)
+        # Always compute full LTC path so gradients flow through the gate
+        # even when all tokens are below threshold (prevents gate from
+        # getting stuck in a "bypass everything" state).
 
         # Compute complexity signal (how "surprising" each position is)
         complexity = torch.sigmoid(self.complexity_proj(x))  # (B, L, D)
@@ -537,7 +537,8 @@ class CDLEBlock(nn.Module):
 
         # LTC with optional sparse routing
         self.ltc = LiquidTimeConstant(
-            d_model, tau_base, complexity_threshold=complexity_threshold,
+            d_model, tau_base,
+            complexity_gate_threshold=complexity_threshold,
         )
 
         # Configurable FF variant
@@ -818,9 +819,10 @@ if __name__ == "__main__":
 
     model = CDLEModel.from_config(cfg)
     n_params = model.count_parameters()
+    max_params = cfg.get("model", {}).get("max_params", 12_000_000)
     print(f"CDLE parameter count: {n_params:,}")
-    assert 1_000_000 <= n_params <= 12_000_000, (
-        f"Parameter count {n_params:,} outside 1M–12M range"
+    assert 1_000_000 <= n_params <= max_params, (
+        f"Parameter count {n_params:,} outside 1M–{max_params // 1_000_000}M range"
     )
 
     # Dummy forward pass (training mode for FF loss)
@@ -848,7 +850,7 @@ if __name__ == "__main__":
     print(f"FractalSSM test passed ✓  (shape {y_fractal.shape})")
 
     # --- Test LTC sparse routing ---
-    ltc_sparse = LiquidTimeConstant(d, tau_base=1.0, complexity_threshold=0.5)
+    ltc_sparse = LiquidTimeConstant(d, tau_base=1.0, complexity_gate_threshold=0.5)
     y_ltc = ltc_sparse(x_test)
     assert y_ltc.shape == x_test.shape, "LTC sparse routing shape mismatch"
     print(f"LTC sparse routing test passed ✓  (shape {y_ltc.shape})")
