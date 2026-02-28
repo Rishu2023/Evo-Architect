@@ -277,10 +277,9 @@ def parse_and_validate_config(raw_yaml: str, current_config: dict) -> dict:
     m["vocab_size"] = 256
     m["seq_len"] = 256
 
-    # Clamp model size to 1 M–8 M parameters
+    # Clamp individual hyperparameters first
     # Apply divisibility by 8 FIRST, then clamp, so both constraints hold
     d_model_raw = int(m.get("d_model", 128))
-    # Round to nearest multiple of 8
     d_model_raw = max(8, round(d_model_raw / 8) * 8)
     m["d_model"] = max(64, min(256, d_model_raw))
 
@@ -290,6 +289,36 @@ def parse_and_validate_config(raw_yaml: str, current_config: dict) -> dict:
     m["ltc_tau_base"] = max(0.1, min(5.0, float(m.get("ltc_tau_base", 1.0))))
     m["ff_threshold"] = max(0.5, min(10.0, float(m.get("ff_threshold", 2.0))))
     m["dropout"] = max(0.0, min(0.3, float(m.get("dropout", 0.0))))
+
+    # Validate actual parameter count using a formula-based estimate (no torch).
+    # If outside [1M, 8M], scale d_model up/down by one step (8 params) until satisfied.
+    # Max iterations: d_model range is 64–256 (192 values), step size 8 → at most 24 steps;
+    # 32 gives a safe margin.
+    MIN_PARAMS = 1_000_000
+    MAX_PARAMS = 8_000_000
+    # Compute initial estimate before the loop so `estimated` is always defined.
+    estimated = _estimate_cdle_params(
+        d_model=m["d_model"],
+        n_layers=m["n_layers"],
+        d_state=m["d_state"],
+        vocab_size=m["vocab_size"],
+        seq_len=m["seq_len"],
+    )
+    for _ in range(32):
+        if estimated < MIN_PARAMS and m["d_model"] < 256:
+            m["d_model"] = min(256, m["d_model"] + 8)
+        elif estimated > MAX_PARAMS and m["d_model"] > 64:
+            m["d_model"] = max(64, m["d_model"] - 8)
+        else:
+            break
+        estimated = _estimate_cdle_params(
+            d_model=m["d_model"],
+            n_layers=m["n_layers"],
+            d_state=m["d_state"],
+            vocab_size=m["vocab_size"],
+            seq_len=m["seq_len"],
+        )
+    log.info(f"Estimated CDLE param count: {estimated:,} (target 1M–8M)")
 
     # Clamp training hyperparameters
     t["batch_size"] = max(8, min(128, int(t.get("batch_size", 32))))
@@ -302,6 +331,58 @@ def parse_and_validate_config(raw_yaml: str, current_config: dict) -> dict:
     t["val_steps"] = 20
 
     return new_cfg
+
+
+def _estimate_cdle_params(
+    d_model: int,
+    n_layers: int,
+    d_state: int,
+    vocab_size: int = 256,
+    seq_len: int = 256,
+) -> int:
+    """
+    Lightweight formula-based estimate of CDLEModel parameter count.
+
+    No torch dependency — safe to call during config validation.
+
+    Breakdown per CDLEBlock:
+      SelectiveSSM: in_proj(D→2D) + x_proj(D→2N+1) + A_log(N) + D_skip(D) + out_proj(D→D)
+      LTC:          3 × Linear(D→D, bias) + LayerNorm(D)
+      FFLayer:      Linear(D→D, bias) + LayerNorm(D)
+      2 × pre-norm: LayerNorm(D)
+
+    Args:
+        d_model:    Hidden dimension.
+        n_layers:   Number of CDLE blocks.
+        d_state:    SSM state size.
+        vocab_size: Token vocabulary size.
+        seq_len:    Maximum sequence length (for positional embeddings).
+
+    Returns:
+        Estimated parameter count (int).
+    """
+    D, N = d_model, d_state
+
+    # Embeddings (tied lm_head counts once)
+    embedding_params = vocab_size * D + seq_len * D
+
+    # Per CDLEBlock
+    ssm_params = (
+        D * (2 * D)           # in_proj
+        + D * (2 * N + 1)     # x_proj
+        + N                   # A_log
+        + D                   # D_skip
+        + D * D               # out_proj
+    )
+    ltc_params = 3 * (D * D + D) + 2 * D   # 3 linears + LayerNorm
+    ff_params = (D * D + D) + 2 * D        # linear + LayerNorm
+    pre_norms = 2 * 2 * D                  # 2 × LayerNorm (weight + bias)
+    per_block = ssm_params + ltc_params + ff_params + pre_norms
+
+    # Final LayerNorm
+    final_norm = 2 * D
+
+    return embedding_params + n_layers * per_block + final_norm
 
 
 # ---------------------------------------------------------------------------

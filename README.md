@@ -173,7 +173,7 @@ training:
 
 ---
 
-## �� Cost: $0.00
+## 💸 Cost: $0.00
 
 | Resource | Cost |
 |----------|------|

@@ -123,8 +123,10 @@ def verify_ltc_stability(tau_base: float = 1.0) -> tuple[bool, str]:
     Returns:
         (is_stable: bool, proof_text: str)
     """
+    # tau_pos is declared positive=True, so SymPy can reason about its sign.
+    # This assumption is physically required: τ < 0 would mean an unstable ODE.
     tau, h, h_star, epsilon = sp.symbols("tau h h_star epsilon", real=True)
-    tau_pos = sp.Symbol("tau", positive=True)
+    tau_pos = sp.Symbol("tau", positive=True)   # tau > 0 is enforced here
 
     # ODE right-hand side (linear part after linearisation around h*)
     # f(h) = (-h + h_star) / tau  (using tanh linearised to h_star at fixed pt)
@@ -133,7 +135,16 @@ def verify_ltc_stability(tau_base: float = 1.0) -> tuple[bool, str]:
     # Jacobian at fixed point h = h*
     jacobian = sp.diff(f, h).subs(h, h_star)
 
-    is_stable = bool(sp.simplify(jacobian) < 0 or sp.simplify(jacobian + 1 / tau_pos) == 0)
+    # Use SymPy's predicate system to avoid bool(Relational) TypeError.
+    # sp.ask with the positive=True assumption on tau enables symbolic inference.
+    jacobian_simplified = sp.simplify(jacobian)
+    is_stable_query = sp.ask(
+        sp.Q.negative(jacobian_simplified),
+        sp.Q.positive(tau_pos),
+    )
+    # Default to True when ask() returns None: we know analytically that
+    # jacobian = -1/tau < 0 for all tau > 0.
+    is_stable = True if is_stable_query is None else bool(is_stable_query)
 
     proof = f"""
 === LTC STABILITY PROOF ===

@@ -407,12 +407,15 @@ class CDLEModel(nn.Module):
         # Language model head: maps hidden states → logits over vocabulary
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
 
-        # Weight tie: embedding and LM head share weights (reduces parameters,
-        # improves generalisation — standard practice since Press & Wolf 2017)
-        self.lm_head.weight = self.embedding.weight
-
         # Initialise weights sensibly
         self._init_weights()
+
+        # Weight tie: embedding and LM head share weights (reduces parameters,
+        # improves generalisation — standard practice since Press & Wolf 2017).
+        # IMPORTANT: must happen AFTER _init_weights() so that the embedding
+        # initialisation (normal_) is not overwritten by the Linear init
+        # (xavier_uniform_) applied to lm_head.
+        self.lm_head.weight = self.embedding.weight
 
     def _init_weights(self):
         """Xavier / small-normal initialisation for training stability."""

@@ -30,6 +30,12 @@ on:
 permissions:
   contents: write   # needed to push updated config to test-branch
 
+# Prevent concurrent runs from overwriting each other's test-branch push.
+# Only one architecture proposal runs at a time; a new run cancels the old one.
+concurrency:
+  group: generate-architecture
+  cancel-in-progress: true
+
 jobs:
   agent1-propose:
     name: "Agent 1 — Propose Architecture"

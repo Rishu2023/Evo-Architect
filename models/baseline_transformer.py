@@ -174,10 +174,11 @@ class BaselineTransformer(nn.Module):
         self.norm_out = nn.LayerNorm(d_model)
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
 
-        # Weight tying
-        self.lm_head.weight = self.embedding.weight
-
         self._init_weights()
+
+        # Weight tying: must happen AFTER _init_weights() so embedding init
+        # (normal_) is not overwritten by lm_head's Linear init.
+        self.lm_head.weight = self.embedding.weight
 
     def _init_weights(self):
         """Standard GPT-style weight initialisation."""

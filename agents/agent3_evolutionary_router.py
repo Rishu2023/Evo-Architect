@@ -116,20 +116,27 @@ def main():
         # Update best metrics
         memory["best_loss_per_watt"] = new_lpw
         memory["best_val_loss"] = new_val_loss
-        # Snapshot the winning config
-        memory["active_config"] = cfg.get("model", {})
+        # Snapshot the full winning config (model + training) so a later discard
+        # can restore both sections completely.
+        memory["active_config"] = {
+            "model": cfg.get("model", {}),
+            "training": cfg.get("training", {}),
+        }
     else:
         verdict = "discarded"
         log.info(
             f"❌ DISCARDED — new model (lpw={new_lpw:.6f}) does NOT improve "
             f"over best (lpw={best_lpw:.6f}). Reverting config."
         )
-        # Restore best config if we have one
+        # Restore both model AND training sections to avoid leaving mutated
+        # training hyperparameters in config.yaml after a rejected generation.
         if memory.get("active_config"):
-            cfg["model"] = memory["active_config"]
+            best = memory["active_config"]
+            cfg["model"] = best.get("model", cfg.get("model", {}))
+            cfg["training"] = best.get("training", cfg.get("training", {}))
             with open(CONFIG_PATH, "w") as f:
                 yaml.dump(cfg, f, default_flow_style=False, sort_keys=False)
-            log.info("Reverted config.yaml to best known configuration.")
+            log.info("Reverted config.yaml (model + training) to best known configuration.")
 
     # ------------------------------------------------------------------
     # Update memory

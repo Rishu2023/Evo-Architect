@@ -38,7 +38,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from models.cdle_base import CDLEModel
 from models.baseline_transformer import BaselineTransformer
 from data.prepare_tinystories import prepare_data
-from utils.metrics import compute_loss_per_watt, estimate_flops, format_results, Timer
+from utils.metrics import compute_loss_per_watt, estimate_flops, format_results
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
