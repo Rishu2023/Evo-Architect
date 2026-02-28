@@ -3,7 +3,10 @@
     "ssm_stable": true,
     "ltc_stable": true,
     "ff_gradients_ok": true,
+    "numerical_ok": true,
+    "long_seq_stable": true,
+    "gradient_flow_ok": true,
     "stability_score": 1.0,
-    "proof_summary": "=== OVERALL STABILITY SUMMARY ===\n  SSM eigenvalue stability:    PASS \u2713\n  LTC ODE stability:           PASS \u2713\n  FF gradient regularity:      PASS \u2713\n  -------------------------------------------\n  Overall stability score:     1.00 / 1.00\n  Verdict: STABLE \u2014 architecture is theoretically sound.\n=================================================="
+    "proof_summary": "=== OVERALL STABILITY SUMMARY ===\n  SSM eigenvalue stability:    PASS \u2713\n  LTC ODE stability:           PASS \u2713\n  FF gradient regularity:      PASS \u2713\n  Numerical stress test:       PASS \u2713\n  Long-sequence stability:     PASS \u2713\n  Gradient flow proof:         PASS \u2713\n  -------------------------------------------\n  Overall stability score:     1.00 / 1.00\n  Verdict: STABLE \u2014 architecture is theoretically sound.\n=================================================="
   }
 }
