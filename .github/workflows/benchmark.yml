@@ -1,0 +1,118 @@
+# ===========================================================================
+# .github/workflows/benchmark.yml
+# ===========================================================================
+# Agent 2: Benchmarker
+#
+# Trigger:
+#   - Push to `test-branch` (set by Agent 1 workflow)
+#
+# What it does:
+#   1. Installs CPU-only PyTorch + all dependencies.
+#   2. Downloads and caches TinyStories (first 10 k samples).
+#   3. Trains CDLE model for max_steps (≤500 steps ≈ 5–7 min on CPU).
+#   4. Trains baseline transformer for the same steps.
+#   5. Computes val_loss, train_time_s, loss_per_watt, FLOPs.
+#   6. Saves benchmark_results.json and triggers judge-and-merge.yml.
+#
+# Time budget: ≤8 min total (well within 12 min workflow limit).
+# ===========================================================================
+
+name: Benchmark Architecture
+
+on:
+  push:
+    branches:
+      - test-branch
+
+permissions:
+  contents: write   # commit benchmark results back to branch
+  actions: write    # trigger downstream workflow
+
+jobs:
+  agent2-benchmark:
+    name: "Agent 2 — Train & Benchmark"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12   # hard cap; script itself targets ≤8 min
+
+    steps:
+      # ----------------------------------------------------------------
+      # 1. Checkout test-branch
+      # ----------------------------------------------------------------
+      - name: Checkout test-branch
+        uses: actions/checkout@v4
+        with:
+          ref: test-branch
+          fetch-depth: 1
+
+      # ----------------------------------------------------------------
+      # 2. Set up Python
+      # ----------------------------------------------------------------
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ----------------------------------------------------------------
+      # 3. Install CPU-only PyTorch + all dependencies
+      #    Using the CPU-only index to avoid downloading CUDA binaries
+      #    (saves ~5 min install time and ~2 GB bandwidth).
+      # ----------------------------------------------------------------
+      - name: Install CPU-only PyTorch and dependencies
+        run: |
+          pip install --upgrade pip
+          # Install torch CPU-only first (avoids downloading CUDA builds)
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          # Install remaining dependencies
+          pip install datasets huggingface_hub numpy matplotlib pyyaml sympy openai
+
+      # ----------------------------------------------------------------
+      # 4. Cache the TinyStories preprocessed data between runs
+      # ----------------------------------------------------------------
+      - name: Cache TinyStories data
+        uses: actions/cache@v4
+        with:
+          path: data/tinystories_cache.pt
+          key: tinystories-${{ hashFiles('config.yaml') }}-v1
+          restore-keys: |
+            tinystories-
+
+      # ----------------------------------------------------------------
+      # 5. Prepare data (downloads from HuggingFace if cache missed)
+      # ----------------------------------------------------------------
+      - name: Prepare TinyStories dataset
+        run: |
+          python data/prepare_tinystories.py
+
+      # ----------------------------------------------------------------
+      # 6. Run Agent 2 — train and benchmark both models
+      # ----------------------------------------------------------------
+      - name: Run Agent 2 — Benchmarker
+        run: |
+          python agents/agent2_benchmark.py
+
+      # ----------------------------------------------------------------
+      # 7. Commit benchmark results back to test-branch
+      # ----------------------------------------------------------------
+      - name: Commit benchmark results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add benchmark_results.json
+          git diff --cached --quiet && echo "No new results to commit." || \
+            git commit -m "📊 Benchmark results for generation $(python -c \
+              \"import json; m=json.load(open('evolutionary_memory.json')); print(m.get('generation','?'))\")"
+
+          git push origin test-branch
+
+      # ----------------------------------------------------------------
+      # 8. Upload benchmark results as a workflow artifact (for debugging)
+      # ----------------------------------------------------------------
+      - name: Upload benchmark results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: benchmark_results.json
+          retention-days: 30
