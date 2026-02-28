@@ -54,8 +54,11 @@ class SelectiveSSM(nn.Module):
         # Selective projections: produce Δ (delta / time-step), B, C from input
         self.x_proj = nn.Linear(d_model, d_state * 2 + 1, bias=False)
 
-        # Learnable log of the diagonal A matrix (initialised to small negatives
-        # for stable exponential discretisation: A_bar = exp(Δ * A))
+        # Learnable log of the diagonal A matrix.
+        # Initialised as log(1), log(2), ..., log(d_state), giving a log-linear
+        # spacing of initial A magnitudes. This spreads the initial time scales
+        # across a wide range, helping the SSM capture both fast and slow dynamics.
+        # We store log(|A|) so that A = -exp(A_log) is always negative (stable).
         self.A_log = nn.Parameter(
             torch.log(torch.arange(1, d_state + 1, dtype=torch.float32))
             .unsqueeze(0)  # shape: (1, d_state)

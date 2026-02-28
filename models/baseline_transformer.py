@@ -234,12 +234,9 @@ class BaselineTransformer(nn.Module):
             Initialised BaselineTransformer.
         """
         m = cfg.get("model", cfg)
-        # Infer n_heads: largest power of 2 that divides d_model, max 8
+        # n_heads: largest power of 2 that divides d_model, capped at 8
         d_model = m.get("d_model", 128)
-        n_heads = 1
-        for h in [2, 4, 8]:
-            if d_model % h == 0:
-                n_heads = h
+        n_heads = max(h for h in [1, 2, 4, 8] if d_model % h == 0)
         return cls(
             vocab_size=m.get("vocab_size", 256),
             d_model=d_model,

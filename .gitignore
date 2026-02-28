@@ -50,3 +50,9 @@ logs/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Python bytecode
+utils/__pycache__/
+models/__pycache__/
+agents/__pycache__/
+data/__pycache__/

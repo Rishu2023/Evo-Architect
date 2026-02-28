@@ -278,9 +278,11 @@ def parse_and_validate_config(raw_yaml: str, current_config: dict) -> dict:
     m["seq_len"] = 256
 
     # Clamp model size to 1 M–8 M parameters
-    m["d_model"] = max(64, min(256, int(m.get("d_model", 128))))
-    # d_model must be divisible by 8
-    m["d_model"] = (m["d_model"] // 8) * 8
+    # Apply divisibility by 8 FIRST, then clamp, so both constraints hold
+    d_model_raw = int(m.get("d_model", 128))
+    # Round to nearest multiple of 8
+    d_model_raw = max(8, round(d_model_raw / 8) * 8)
+    m["d_model"] = max(64, min(256, d_model_raw))
 
     m["n_layers"] = max(2, min(8, int(m.get("n_layers", 4))))
     m["d_state"] = max(8, min(64, int(m.get("d_state", 16))))

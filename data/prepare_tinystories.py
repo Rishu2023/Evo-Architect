@@ -149,7 +149,7 @@ def prepare_data(config_path: str = "config.yaml") -> str:
     # Convert to tensors
     # ------------------------------------------------------------------
     train_tensor = torch.tensor(train_chunks, dtype=torch.long)
-    val_tensor = torch.tensor(val_chunks, dtype=torch.long) if val_chunks else train_tensor[:100]
+    val_tensor = torch.tensor(val_chunks, dtype=torch.long) if val_chunks else train_tensor[-100:]
 
     # ------------------------------------------------------------------
     # Save cache
