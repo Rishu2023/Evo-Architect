@@ -1,0 +1,148 @@
+# ===========================================================================
+# .github/workflows/judge-and-merge.yml
+# ===========================================================================
+# Agents 3 + 4: Evolutionary Router + Formal Verifier
+#
+# Trigger:
+#   - workflow_run: runs after `Benchmark Architecture` workflow completes
+#     successfully on test-branch.
+#
+# What it does:
+#   1. Checks out test-branch (which has the latest benchmark_results.json).
+#   2. Runs Agent 4 (Verifier) — SymPy gradient stability analysis.
+#   3. Runs Agent 3 (Router) — compare results, decide merge or discard.
+#   4a. If MERGED:
+#       - Fast-forward main branch from test-branch (merge winning config).
+#       - Commit updated evolutionary_memory.json to main.
+#   4b. If DISCARDED:
+#       - Restore best config on test-branch (already done by Agent 3).
+#       - Log the rejection.
+# ===========================================================================
+
+name: Judge and Merge
+
+on:
+  workflow_run:
+    workflows:
+      - "Benchmark Architecture"
+    types:
+      - completed
+    branches:
+      - test-branch
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  agent3-4-judge:
+    name: "Agents 3+4 — Verify & Route"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run if the benchmark workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      # ----------------------------------------------------------------
+      # 1. Checkout test-branch (has benchmark_results.json)
+      # ----------------------------------------------------------------
+      - name: Checkout test-branch
+        uses: actions/checkout@v4
+        with:
+          ref: test-branch
+          fetch-depth: 0   # full history needed for merge
+
+      # ----------------------------------------------------------------
+      # 2. Set up Python
+      # ----------------------------------------------------------------
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ----------------------------------------------------------------
+      # 3. Install minimal dependencies (no torch needed for verification)
+      # ----------------------------------------------------------------
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install sympy pyyaml
+
+      # ----------------------------------------------------------------
+      # 4. Run Agent 4 — Formal Verifier (SymPy stability analysis)
+      # ----------------------------------------------------------------
+      - name: Run Agent 4 — Formal Verifier
+        run: |
+          python agents/agent4_verifier.py
+
+      # ----------------------------------------------------------------
+      # 5. Run Agent 3 — Evolutionary Router (merge or discard decision)
+      #    Exit code 0 = merged, 1 = discarded, 2 = error
+      # ----------------------------------------------------------------
+      - name: Run Agent 3 — Evolutionary Router
+        id: router
+        run: |
+          python agents/agent3_evolutionary_router.py
+          echo "verdict=merged" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Set discard verdict if router exited non-zero
+        if: steps.router.outcome == 'failure'
+        run: |
+          echo "verdict=discarded"
+          echo "Agent 3 discarded this architecture."
+
+      # ----------------------------------------------------------------
+      # 6. Commit verification + memory updates back to test-branch
+      # ----------------------------------------------------------------
+      - name: Commit verification results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add benchmark_results.json evolutionary_memory.json config.yaml
+          git diff --cached --quiet && echo "Nothing to commit." || \
+            git commit -m "🔬 Agent 4 stability analysis + Agent 3 routing decision"
+          git push origin test-branch
+
+      # ----------------------------------------------------------------
+      # 7a. MERGED path: merge test-branch → main
+      # ----------------------------------------------------------------
+      - name: Merge test-branch into main (if verdict = merged)
+        if: steps.router.outcome == 'success'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch main and merge test-branch
+          git fetch origin main
+          git checkout main
+          git merge --no-ff test-branch \
+            -m "🧬 Merge generation $(python -c \"import json; m=json.load(open('evolutionary_memory.json')); print(m.get('generation','?'))\") — new best architecture"
+          git push origin main
+
+          echo "✅ Architecture MERGED to main."
+
+      # ----------------------------------------------------------------
+      # 7b. DISCARDED path: log rejection
+      # ----------------------------------------------------------------
+      - name: Log rejection (if verdict = discarded)
+        if: steps.router.outcome != 'success'
+        run: |
+          echo "❌ Architecture DISCARDED — no improvement over current best."
+          echo "The evolutionary memory has been updated with this failure."
+          echo "Agent 1 will use this information in the next generation."
+
+      # ----------------------------------------------------------------
+      # 8. Upload final results as artifact
+      # ----------------------------------------------------------------
+      - name: Upload final results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evolutionary-results
+          path: |
+            benchmark_results.json
+            evolutionary_memory.json
+          retention-days: 30

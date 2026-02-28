@@ -1,0 +1,97 @@
+# ===========================================================================
+# .github/workflows/generate-architecture.yml
+# ===========================================================================
+# Agent 1: Theoretical Physicist
+#
+# Triggers:
+#   - Manual: workflow_dispatch (run from Actions tab)
+#   - Scheduled: every hour via cron
+#
+# What it does:
+#   1. Installs dependencies.
+#   2. Runs agent1_physicist.py which calls GitHub Models (gpt-4o-mini)
+#      to propose new hyperparameters.
+#   3. Commits updated config.yaml + evolutionary_memory.json to test-branch.
+#   4. This commit automatically triggers benchmark.yml.
+#
+# Cost: ~2 min per run × 24 runs/day = ~48 min/day → well within 2000 min/month.
+# ===========================================================================
+
+name: Generate New Architecture
+
+on:
+  # Manual trigger from Actions tab
+  workflow_dispatch:
+
+  # Hourly schedule (UTC) — adjust to taste
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write   # needed to push updated config to test-branch
+
+# Prevent concurrent runs from overwriting each other's test-branch push.
+# Only one architecture proposal runs at a time; a new run cancels the old one.
+concurrency:
+  group: generate-architecture
+  cancel-in-progress: true
+
+jobs:
+  agent1-propose:
+    name: "Agent 1 — Propose Architecture"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ----------------------------------------------------------------
+      # 1. Checkout repository
+      # ----------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      # ----------------------------------------------------------------
+      # 2. Set up Python
+      # ----------------------------------------------------------------
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # ----------------------------------------------------------------
+      # 3. Install dependencies (CPU-only torch is fast to install)
+      # ----------------------------------------------------------------
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install openai pyyaml
+
+      # ----------------------------------------------------------------
+      # 4. Run Agent 1 (calls GitHub Models API with GITHUB_TOKEN)
+      # ----------------------------------------------------------------
+      - name: Run Agent 1 — Theoretical Physicist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python agents/agent1_physicist.py
+
+      # ----------------------------------------------------------------
+      # 5. Commit and push updated files to test-branch
+      # ----------------------------------------------------------------
+      - name: Commit proposed config to test-branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Ensure test-branch exists (create from current HEAD if not)
+          git fetch origin test-branch || true
+          git checkout -B test-branch
+
+          git add config.yaml evolutionary_memory.json
+          git diff --cached --quiet && echo "No changes to commit." || \
+            git commit -m "🧬 Gen $(python -c \"import json; m=json.load(open('evolutionary_memory.json')); print(m.get('generation','?'))\") — Agent 1 proposes new architecture"
+
+          git push origin test-branch --force

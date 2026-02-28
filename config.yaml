@@ -1,0 +1,84 @@
+# ============================================================
+# Evo-Architect Global Configuration
+# All hyperparameters are defined here so Agent 1 can mutate
+# this file to propose new architectural variants.
+# ============================================================
+
+model:
+  # Embedding / hidden dimension.  Must be divisible by 8.
+  d_model: 192
+
+  # Number of stacked CDLE blocks
+  n_layers: 4
+
+  # SSM state dimension (controls memory capacity of each layer)
+  d_state: 16
+
+  # Intermediate expansion factor inside each CDLE block
+  d_ff: 256
+
+  # Vocabulary size: 256 for raw bytes (0–255)
+  vocab_size: 256
+
+  # Context window length in tokens (bytes)
+  seq_len: 256
+
+  # Liquid Time-Constant base tau value
+  ltc_tau_base: 1.0
+
+  # Forward-Forward goodness threshold
+  ff_threshold: 2.0
+
+  # Dropout probability (0 = off for speed)
+  dropout: 0.0
+
+training:
+  # Mini-batch size. Keep small for CPU memory.
+  batch_size: 32
+
+  # Maximum optimiser steps. 500 steps × ~0.5 s/step ≈ 4 min on CPU.
+  max_steps: 500
+
+  # Validation interval (every N steps)
+  val_every: 100
+
+  # Number of validation batches
+  val_steps: 20
+
+  # AdamW learning rate
+  learning_rate: 3.0e-4
+
+  # Weight decay for regularisation
+  weight_decay: 1.0e-2
+
+  # Gradient clipping max norm
+  grad_clip: 1.0
+
+  # Warmup steps for linear LR schedule
+  warmup_steps: 50
+
+data:
+  # Hugging Face dataset name
+  dataset_name: "roneneldan/TinyStories"
+
+  # Number of training samples to use (keep low for speed)
+  num_train_samples: 9000
+
+  # Number of validation samples
+  num_val_samples: 1000
+
+  # Local cache path for prepared data
+  cache_path: "data/tinystories_cache.pt"
+
+evolution:
+  # Path to the evolutionary memory JSON file
+  memory_path: "evolutionary_memory.json"
+
+  # Path to the latest benchmark results
+  results_path: "benchmark_results.json"
+
+  # Improvement threshold: new model must beat best by at least this fraction
+  improvement_threshold: 0.01
+
+  # Maximum history entries to keep in memory (oldest are pruned)
+  max_history: 20

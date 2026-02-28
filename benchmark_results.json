@@ -1,0 +1,9 @@
+{
+  "stability": {
+    "ssm_stable": true,
+    "ltc_stable": true,
+    "ff_gradients_ok": true,
+    "stability_score": 1.0,
+    "proof_summary": "=== OVERALL STABILITY SUMMARY ===\n  SSM eigenvalue stability:    PASS \u2713\n  LTC ODE stability:           PASS \u2713\n  FF gradient regularity:      PASS \u2713\n  -------------------------------------------\n  Overall stability score:     1.00 / 1.00\n  Verdict: STABLE \u2014 architecture is theoretically sound.\n=================================================="
+  }
+}

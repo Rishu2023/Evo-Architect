@@ -1,0 +1,24 @@
+# Core deep learning — CPU-only PyTorch 2.x
+--index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
+
+# Hugging Face ecosystem for TinyStories dataset
+datasets
+huggingface_hub
+
+# Numerical computing
+numpy
+
+# Plotting / visualisation
+matplotlib
+
+# Symbolic mathematics for gradient stability verification (Agent 4)
+sympy
+
+# YAML config parsing
+pyyaml
+
+# HTTP client used by GitHub Models API calls
+openai
