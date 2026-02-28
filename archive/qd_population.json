@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "description": "MAP-Elites Quality-Diversity archive for CDLE evolution",
+    "complexity_bins": 4,
+    "sparsity_bins": 3,
+    "max_species": 12,
+    "created": "2026-02-28"
+  },
+  "niches": {},
+  "stats": {
+    "total_insertions": 0,
+    "total_replacements": 0,
+    "coverage": 0.0
+  }
+}
