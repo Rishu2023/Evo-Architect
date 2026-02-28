@@ -1,0 +1,14 @@
+{
+  "difficulty": 0.3,
+  "ordering": "short_first",
+  "max_seq_fraction": 0.5,
+  "generation": 1,
+  "history": [
+    {
+      "generation": 1,
+      "signal": "hold",
+      "difficulty": 0.3,
+      "ordering": "short_first"
+    }
+  ]
+}
