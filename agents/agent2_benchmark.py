@@ -39,6 +39,8 @@ from models.cdle_base import CDLEModel
 from models.baseline_transformer import BaselineTransformer
 from data.prepare_tinystories import prepare_data
 from utils.metrics import compute_loss_per_watt, estimate_flops, format_results
+from utils.metrics import compute_sparsity, estimate_memory_mb, pareto_score, estimate_energy
+from benchmarks.multi_task_eval import run_multi_task_eval
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -134,6 +136,7 @@ def train_model(
     train_loss_accum = 0.0
     train_loss_count = 0
     last_val_loss = float("inf")
+    loss_at_step_100 = None
 
     log.info(
         f"[{model_name}] Starting training: {max_steps} steps, "
@@ -178,6 +181,10 @@ def train_model(
 
         train_loss_accum += ce_loss.item()
         train_loss_count += 1
+
+        # Track loss at step 100 (0-indexed step 99) for continual adaptation delta
+        if step == 99:
+            loss_at_step_100 = ce_loss.item()
 
         # Logging
         if (step + 1) % 50 == 0:
@@ -230,6 +237,25 @@ def train_model(
         "batch_size": batch_size,
         "learning_rate": lr,
     }
+
+    # Pareto multi-objective metrics
+    ce_loss_value = last_val_loss
+    sparsity = compute_sparsity(model)
+    memory_mb = estimate_memory_mb(model)
+    energy = estimate_energy(flops, train_time, cpu_tdp_watts=65.0)
+    continual_delta = (loss_at_step_100 - ce_loss_value) if loss_at_step_100 is not None else 0.0
+    pareto = pareto_score({
+        "loss_per_sec": ce_loss_value / max(train_time, 1e-6),
+        "sparsity": sparsity,
+        "memory_mb": memory_mb,
+    })
+
+    results["sparsity"] = round(sparsity, 6)
+    results["memory_mb"] = round(memory_mb, 4)
+    results["energy"] = {k: round(v, 6) if isinstance(v, float) else v for k, v in energy.items()}
+    results["continual_delta"] = round(continual_delta, 6)
+    results["pareto_score"] = round(pareto, 8)
+
     return results
 
 
@@ -299,6 +325,11 @@ def main():
     log.info(f"CDLE model params: {cdle_model.count_parameters():,}")
 
     cdle_results = train_model(cdle_model, train_ds, val_ds, cfg, "CDLE")
+
+    # Multi-task evaluation on CDLE model
+    multi_task_results = run_multi_task_eval(cdle_model, seq_len=cfg["model"]["seq_len"])
+    cdle_results["multi_task"] = multi_task_results
+
     all_results["cdle"] = cdle_results
     print(format_results(cdle_results, "CDLE Benchmark"))
 
@@ -330,6 +361,11 @@ def main():
         f"Baseline: {base_lpw:.6f} | "
         f"CDLE improvement: {improvement:+.1f}%"
     )
+
+    # ------------------------------------------------------------------
+    # Multi-task results
+    # ------------------------------------------------------------------
+    all_results["multi_task"] = multi_task_results
 
     # ------------------------------------------------------------------
     # Save results
