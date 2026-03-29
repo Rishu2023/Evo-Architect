@@ -1,71 +1,29 @@
 {
   "literature": {
-    "last_updated": "2026-03-08",
+    "last_updated": "2026-03-29",
     "papers": [
       {
-        "title": "CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration",
-        "abstract_snippet": "Reconstructing degraded images is a critical task in image processing. Although CNN and Transformer-based models are prevalent in this field, they exhibit inherent limitations, such as inadequate long-range dependency modeling and high computational costs. To overcome these issues, we introduce the ...",
-        "year": 2024,
-        "citations": 34,
-        "url": "https://www.semanticscholar.org/paper/46ac9f54189e233a189035f35f850f90128f6465"
-      },
-      {
-        "title": "Jet-Nemotron: Efficient Language Model with Post Neural Architecture Search",
-        "abstract_snippet": "We present Jet-Nemotron, a new family of hybrid-architecture language models, which matches or exceeds the accuracy of leading full-attention models while significantly improving generation throughput. Jet-Nemotron is developed using Post Neural Architecture Search (PostNAS), a novel neural architec...",
-        "year": 2025,
-        "citations": 18,
-        "url": "https://www.semanticscholar.org/paper/c7b8d5f73f1b7a49e83e30c7215c247956cdae2f"
-      },
-      {
-        "title": "SELD-Mamba: Selective State-Space Model for Sound Event Localization and Detection with Source Distance Estimation",
-        "abstract_snippet": "In the Sound Event Localization and Detection (SELD) task, Transformer-based models have demonstrated impressive capabilities. However, the quadratic complexity of the Transformer's self-attention mechanism results in computational inefficiencies. In this paper, we propose a network architecture for...",
-        "year": 2024,
-        "citations": 13,
-        "url": "https://www.semanticscholar.org/paper/64b32228bba74cb0888384103db4ec0cc405293f"
-      },
-      {
-        "title": "Optimizing Plant Disease Classification with Hybrid Convolutional Neural Network\u2013Recurrent Neural Network and Liquid Time-Constant Network",
-        "abstract_snippet": "This paper addresses the practical challenge of detecting tomato plant diseases using a hybrid lightweight model that combines a Convolutional Neural Network (CNN) and Recurrent Neural Network (RNN). Traditional image classification models demand substantial computational resources, limiting their p...",
-        "year": 2024,
-        "citations": 9,
-        "url": "https://www.semanticscholar.org/paper/db221d128b3ac932082f0fe0402119229317c862"
-      },
-      {
-        "title": "Transfer-Mamba: Selective state space models with spatio-temporal knowledge transfer for few-shot traffic prediction across cities",
+        "title": "SPMamba: State-space model is all you need in speech separation",
         "abstract_snippet": "",
-        "year": 2025,
-        "citations": 7,
-        "url": "https://www.semanticscholar.org/paper/3bbb9052267ec20f91465735885bb43c35e40ded"
+        "year": 2024,
+        "citations": 76,
+        "url": "https://www.semanticscholar.org/paper/d985e46330dcb76e3e7700e84693d4080061a3e8"
       },
       {
-        "title": "A Model for Learning-Curve Estimation in Efficient Neural Architecture Search and Its Application in Predictive Health Maintenance",
-        "abstract_snippet": "A persistent challenge in machine learning is the computational inefficiency of neural architecture search (NAS), particularly in resource-constrained domains like predictive maintenance. This work introduces a novel learning-curve estimation framework that reduces NAS computational costs by over 50...",
-        "year": 2025,
-        "citations": 6,
-        "url": "https://www.semanticscholar.org/paper/a1f54849e7ecd1103c0664bd82402f013bb86226"
-      },
-      {
-        "title": "Efficient Few-Shot Neural Architecture Search by Counting the Number of Nonlinear Functions",
-        "abstract_snippet": "Neural architecture search (NAS) enables finding the best-performing architecture from a search space automatically. Most NAS methods exploit an over-parameterized network (i.e., a supernet) containing all possible architectures (i.e., subnets) in the search space. However, the subnets that share th...",
+        "title": "Surface Vision Mamba: Leveraging Bidirectional State Space Model for Efficient Spherical Manifold Representation",
+        "abstract_snippet": "Attention-based methods have demonstrated exceptional performance in modelling long-range dependencies on spherical cortical surfaces, surpassing traditional Geometric Deep Learning (GDL) models. However, their extensive inference time and high memory demands pose challenges for application to large...",
         "year": 2025,
         "citations": 4,
-        "url": "https://www.semanticscholar.org/paper/f0b20cfc103ae60c66cbedef8c50cb6ae3c41e1a"
+        "url": "https://www.semanticscholar.org/paper/6012f1a1b772dab821c6dcca7334eaa9ebe959ae"
       },
       {
-        "title": "A scalable RISC-V Coprocessor for Liquid Time-Constant Neural Network",
-        "abstract_snippet": "Liquid Time-Constant recurrent neural networks (LTC) have shown promising results when processing nonstationary time-series data in applications like autonomous driving and navigation. In such applications, the ability of LTC networks to cope with unseen environments sets them apart from other neura...",
-        "year": 2024,
-        "citations": 0,
-        "url": "https://www.semanticscholar.org/paper/764965db79ecd6d5ebb28c9c6d15906411939f4f"
-      },
-      {
-        "title": "ParaFlow: a semi-layered\u00a0Liquid Time-Constant (LTC) and Neural Spline Flow (NSF) network for automated diagnosis of pemphigus vulgaris",
-        "abstract_snippet": "",
+        "title": "Subgrid Stress Modelling with Multi-dimensional State Space Sequence Models",
+        "abstract_snippet": "Large Eddy Simulations (LES) are becoming increasingly viable due to the growth in computational power the last few decades, and subgrid stress modelling plays a large role in the accuracy of LES. A new class of neural network models, S4 and S4ND models, allow for learning a continuous representatio...",
         "year": 2025,
-        "citations": 0,
-        "url": "https://www.semanticscholar.org/paper/90e86f4ae8edef686039d135fdaad7e6e9850009"
+        "citations": 1,
+        "url": "https://www.semanticscholar.org/paper/f62eb95fe5f1665b478818e67eb7f6d6b8f7e5e0"
       }
     ],
-    "summary": "Found 9 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration' (34 citations)."
+    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'SPMamba: State-space model is all you need in speech separation' (76 citations)."
   }
 }
