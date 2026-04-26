@@ -1,29 +1,29 @@
 {
   "literature": {
-    "last_updated": "2026-03-29",
+    "last_updated": "2026-04-26",
     "papers": [
       {
-        "title": "SPMamba: State-space model is all you need in speech separation",
-        "abstract_snippet": "",
+        "title": "CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration",
+        "abstract_snippet": "Reconstructing degraded images is a critical task in image processing. Although CNN and Transformer-based models are prevalent in this field, they exhibit inherent limitations, such as inadequate long-range dependency modeling and high computational costs. To overcome these issues, we introduce the ...",
         "year": 2024,
-        "citations": 76,
-        "url": "https://www.semanticscholar.org/paper/d985e46330dcb76e3e7700e84693d4080061a3e8"
+        "citations": 37,
+        "url": "https://www.semanticscholar.org/paper/46ac9f54189e233a189035f35f850f90128f6465"
       },
       {
-        "title": "Surface Vision Mamba: Leveraging Bidirectional State Space Model for Efficient Spherical Manifold Representation",
-        "abstract_snippet": "Attention-based methods have demonstrated exceptional performance in modelling long-range dependencies on spherical cortical surfaces, surpassing traditional Geometric Deep Learning (GDL) models. However, their extensive inference time and high memory demands pose challenges for application to large...",
-        "year": 2025,
-        "citations": 4,
-        "url": "https://www.semanticscholar.org/paper/6012f1a1b772dab821c6dcca7334eaa9ebe959ae"
+        "title": "SELD-Mamba: Selective State-Space Model for Sound Event Localization and Detection with Source Distance Estimation",
+        "abstract_snippet": "In the Sound Event Localization and Detection (SELD) task, Transformer-based models have demonstrated impressive capabilities. However, the quadratic complexity of the Transformer's self-attention mechanism results in computational inefficiencies. In this paper, we propose a network architecture for...",
+        "year": 2024,
+        "citations": 12,
+        "url": "https://www.semanticscholar.org/paper/64b32228bba74cb0888384103db4ec0cc405293f"
       },
       {
-        "title": "Subgrid Stress Modelling with Multi-dimensional State Space Sequence Models",
-        "abstract_snippet": "Large Eddy Simulations (LES) are becoming increasingly viable due to the growth in computational power the last few decades, and subgrid stress modelling plays a large role in the accuracy of LES. A new class of neural network models, S4 and S4ND models, allow for learning a continuous representatio...",
+        "title": "Transfer-Mamba: Selective state space models with spatio-temporal knowledge transfer for few-shot traffic prediction across cities",
+        "abstract_snippet": "",
         "year": 2025,
-        "citations": 1,
-        "url": "https://www.semanticscholar.org/paper/f62eb95fe5f1665b478818e67eb7f6d6b8f7e5e0"
+        "citations": 7,
+        "url": "https://www.semanticscholar.org/paper/3bbb9052267ec20f91465735885bb43c35e40ded"
       }
     ],
-    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'SPMamba: State-space model is all you need in speech separation' (76 citations)."
+    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration' (37 citations)."
   }
 }
