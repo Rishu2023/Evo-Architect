@@ -1,29 +1,29 @@
 {
   "literature": {
-    "last_updated": "2026-04-26",
+    "last_updated": "2026-05-10",
     "papers": [
       {
-        "title": "CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration",
-        "abstract_snippet": "Reconstructing degraded images is a critical task in image processing. Although CNN and Transformer-based models are prevalent in this field, they exhibit inherent limitations, such as inadequate long-range dependency modeling and high computational costs. To overcome these issues, we introduce the ...",
+        "title": "Optimizing Plant Disease Classification with Hybrid Convolutional Neural Network\u2013Recurrent Neural Network and Liquid Time-Constant Network",
+        "abstract_snippet": "This paper addresses the practical challenge of detecting tomato plant diseases using a hybrid lightweight model that combines a Convolutional Neural Network (CNN) and Recurrent Neural Network (RNN). Traditional image classification models demand substantial computational resources, limiting their p...",
         "year": 2024,
-        "citations": 37,
-        "url": "https://www.semanticscholar.org/paper/46ac9f54189e233a189035f35f850f90128f6465"
+        "citations": 11,
+        "url": "https://www.semanticscholar.org/paper/db221d128b3ac932082f0fe0402119229317c862"
       },
       {
-        "title": "SELD-Mamba: Selective State-Space Model for Sound Event Localization and Detection with Source Distance Estimation",
-        "abstract_snippet": "In the Sound Event Localization and Detection (SELD) task, Transformer-based models have demonstrated impressive capabilities. However, the quadratic complexity of the Transformer's self-attention mechanism results in computational inefficiencies. In this paper, we propose a network architecture for...",
+        "title": "A scalable RISC-V Coprocessor for Liquid Time-Constant Neural Network",
+        "abstract_snippet": "Liquid Time-Constant recurrent neural networks (LTC) have shown promising results when processing nonstationary time-series data in applications like autonomous driving and navigation. In such applications, the ability of LTC networks to cope with unseen environments sets them apart from other neura...",
         "year": 2024,
-        "citations": 12,
-        "url": "https://www.semanticscholar.org/paper/64b32228bba74cb0888384103db4ec0cc405293f"
+        "citations": 0,
+        "url": "https://www.semanticscholar.org/paper/764965db79ecd6d5ebb28c9c6d15906411939f4f"
       },
       {
-        "title": "Transfer-Mamba: Selective state space models with spatio-temporal knowledge transfer for few-shot traffic prediction across cities",
+        "title": "ParaFlow: a semi-layered\u00a0Liquid Time-Constant (LTC) and Neural Spline Flow (NSF) network for automated diagnosis of pemphigus vulgaris",
         "abstract_snippet": "",
         "year": 2025,
-        "citations": 7,
-        "url": "https://www.semanticscholar.org/paper/3bbb9052267ec20f91465735885bb43c35e40ded"
+        "citations": 0,
+        "url": "https://www.semanticscholar.org/paper/90e86f4ae8edef686039d135fdaad7e6e9850009"
       }
     ],
-    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'CU-Mamba: Selective State Space Models with Channel Learning for Image Restoration' (37 citations)."
+    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'Optimizing Plant Disease Classification with Hybrid Convolutional Neural Network\u2013Recurrent Neural Network and Liquid Time-Constant Network' (11 citations)."
   }
 }
