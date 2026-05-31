@@ -1,29 +1,29 @@
 {
   "literature": {
-    "last_updated": "2026-05-10",
+    "last_updated": "2026-05-31",
     "papers": [
       {
-        "title": "Optimizing Plant Disease Classification with Hybrid Convolutional Neural Network\u2013Recurrent Neural Network and Liquid Time-Constant Network",
-        "abstract_snippet": "This paper addresses the practical challenge of detecting tomato plant diseases using a hybrid lightweight model that combines a Convolutional Neural Network (CNN) and Recurrent Neural Network (RNN). Traditional image classification models demand substantial computational resources, limiting their p...",
-        "year": 2024,
-        "citations": 11,
-        "url": "https://www.semanticscholar.org/paper/db221d128b3ac932082f0fe0402119229317c862"
-      },
-      {
-        "title": "A scalable RISC-V Coprocessor for Liquid Time-Constant Neural Network",
-        "abstract_snippet": "Liquid Time-Constant recurrent neural networks (LTC) have shown promising results when processing nonstationary time-series data in applications like autonomous driving and navigation. In such applications, the ability of LTC networks to cope with unseen environments sets them apart from other neura...",
-        "year": 2024,
-        "citations": 0,
-        "url": "https://www.semanticscholar.org/paper/764965db79ecd6d5ebb28c9c6d15906411939f4f"
-      },
-      {
-        "title": "ParaFlow: a semi-layered\u00a0Liquid Time-Constant (LTC) and Neural Spline Flow (NSF) network for automated diagnosis of pemphigus vulgaris",
-        "abstract_snippet": "",
+        "title": "Jet-Nemotron: Efficient Language Model with Post Neural Architecture Search",
+        "abstract_snippet": "We present Jet-Nemotron, a new family of hybrid-architecture language models, which matches or exceeds the accuracy of leading full-attention models while significantly improving generation throughput. Jet-Nemotron is developed using Post Neural Architecture Search (PostNAS), a novel neural architec...",
         "year": 2025,
-        "citations": 0,
-        "url": "https://www.semanticscholar.org/paper/90e86f4ae8edef686039d135fdaad7e6e9850009"
+        "citations": 30,
+        "url": "https://www.semanticscholar.org/paper/c7b8d5f73f1b7a49e83e30c7215c247956cdae2f"
+      },
+      {
+        "title": "Hardware-Aware Iterative One-Shot Neural Architecture Search With Adaptable Knowledge Distillation for Efficient Edge Computing",
+        "abstract_snippet": "The growing demand for edge applications calls for efficient and optimized deep neural network models. Neural Architecture Search (NAS) is instrumental in designing such models, but achieving optimal architectures quickly remains a key challenge. To address this, we propose Hardware-aware Iterative ...",
+        "year": 2025,
+        "citations": 8,
+        "url": "https://www.semanticscholar.org/paper/c6971e4acbe080582927d14d7dde3acc2399cfc4"
+      },
+      {
+        "title": "A Model for Learning-Curve Estimation in Efficient Neural Architecture Search and Its Application in Predictive Health Maintenance",
+        "abstract_snippet": "A persistent challenge in machine learning is the computational inefficiency of neural architecture search (NAS), particularly in resource-constrained domains like predictive maintenance. This work introduces a novel learning-curve estimation framework that reduces NAS computational costs by over 50...",
+        "year": 2025,
+        "citations": 6,
+        "url": "https://www.semanticscholar.org/paper/a1f54849e7ecd1103c0664bd82402f013bb86226"
       }
     ],
-    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'Optimizing Plant Disease Classification with Hybrid Convolutional Neural Network\u2013Recurrent Neural Network and Liquid Time-Constant Network' (11 citations)."
+    "summary": "Found 3 recent papers on SSM, Liquid NNs, and FF learning. Top paper: 'Jet-Nemotron: Efficient Language Model with Post Neural Architecture Search' (30 citations)."
   }
 }
